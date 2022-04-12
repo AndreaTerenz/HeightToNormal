@@ -5,51 +5,61 @@
 [sub_resource type="GDScript" id=2]
 script/source = "extends Control
 
-onready var picker := $FileDialog
+onready var in_picker := $InputImgDialog
+onready var out_picker := $OutputImgDialog
 onready var bump_slider := $VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2/BumpSlider
 onready var src_txt := $VBoxContainer/Panel/MarginContainer/HBoxContainer/SourceTxt
 onready var dest_txt := $VBoxContainer/Panel/MarginContainer/HBoxContainer/DestTxt
 
 var source_img_loaded := false
+var image_path := \"\"
 var image := ImageTexture.new()
 var dest_mat : ShaderMaterial = null
 
 func _ready() -> void:
 	dest_mat = dest_txt.material as ShaderMaterial
 
-
 func _on_LoadBtn_pressed() -> void:
-	picker.show_modal()
+	in_picker.popup()
 
+func _on_ReloadBtn_pressed() -> void:
+	if image_path != \"\":
+		src_txt.texture = load_img_texture()
+		generate()
 
-func _on_GenBtn_pressed() -> void:
+func _on_ExportBtn_pressed() -> void:
+	out_picker.popup()
+
+func _on_in_file_selected(path: String) -> void:
+	image_path = path
+	src_txt.texture = load_img_texture()
 	generate()
 	
 func generate():
 	var img = Image.new()
 	img.copy_from(image.get_data())
-	
 	img.bumpmap_to_normalmap(bump_slider.value)
 	
 	dest_txt.texture = ImageTexture.new()
 	dest_txt.texture.create_from_image(img)
-
-func _on_ExportBtn_pressed() -> void:
-	var output : Image = dest_txt.texture.get_data()
 	
-	output.save_png(\"\")
-
-func _on_FileDialog_file_selected(path: String) -> void:
-	src_txt.texture = load_img_texture(path)
-	
-func load_img_texture(path: String) -> ImageTexture:
+func load_img_texture() -> ImageTexture:
 	var img := Image.new()
-	img.load(path)
+	img.load(image_path)
+	img.convert(Image.FORMAT_L8)
 	
 	image.create_from_image(img)
 	source_img_loaded = true
 		
 	return image
+
+func _on_out_file_selected(path: String) -> void:
+	var output : Image = dest_txt.texture.get_data()
+	
+	output.save_png(path)
+
+func _on_BumpSlider_drag_ended(value_changed: bool) -> void:
+	generate()
 "
 
 [sub_resource type="ImageTexture" id=3]
@@ -155,14 +165,14 @@ rect_min_size = Vector2( 100, 0 )
 size_flags_vertical = 4
 text = "Load"
 
-[node name="GenBtn" type="Button" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer"]
+[node name="ReloadBtn" type="Button" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer"]
 margin_left = 208.0
 margin_top = 23.0
 margin_right = 308.0
 margin_bottom = 65.0
 rect_min_size = Vector2( 100, 0 )
 size_flags_vertical = 4
-text = "Generate"
+text = "Reload"
 
 [node name="ExportBtn" type="Button" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer"]
 margin_left = 338.0
@@ -214,14 +224,35 @@ valign = 1
 script = SubResource( 7 )
 
 [node name="InputImgDialog" type="FileDialog" parent="."]
+visible = true
 anchor_right = 1.0
 anchor_bottom = 1.0
-window_title = "Open a File"
+margin_left = 88.0
+margin_top = 53.0
+margin_right = -88.0
+margin_bottom = -53.0
+window_title = ""
+mode_overrides_title = false
 mode = 0
 access = 2
+filters = PoolStringArray( "*.png ; PNG Images" )
+
+[node name="OutputImgDialog" type="FileDialog" parent="."]
+visible = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 88.0
+margin_top = 54.0
+margin_right = -88.0
+margin_bottom = -53.0
+window_title = ""
+access = 2
+filters = PoolStringArray( "*.png ; PNG Images" )
 
 [connection signal="pressed" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer/LoadBtn" to="." method="_on_LoadBtn_pressed"]
-[connection signal="pressed" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer/GenBtn" to="." method="_on_GenBtn_pressed"]
+[connection signal="pressed" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer/ReloadBtn" to="." method="_on_ReloadBtn_pressed"]
 [connection signal="pressed" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer/ExportBtn" to="." method="_on_ExportBtn_pressed"]
+[connection signal="drag_ended" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2/BumpSlider" to="." method="_on_BumpSlider_drag_ended"]
 [connection signal="value_changed" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2/BumpSlider" to="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2/Label2" method="_on_bump_changed"]
-[connection signal="file_selected" from="InputImgDialog" to="." method="_on_FileDialog_file_selected"]
+[connection signal="file_selected" from="InputImgDialog" to="." method="_on_in_file_selected"]
+[connection signal="file_selected" from="OutputImgDialog" to="." method="_on_out_file_selected"]
