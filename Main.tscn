@@ -1,27 +1,72 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://base_theme.tres" type="Theme" id=1]
 
 [sub_resource type="GDScript" id=2]
 script/source = "extends Control
 
+onready var picker := $FileDialog
+onready var bump_slider := $VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2/BumpSlider
+onready var src_txt := $VBoxContainer/Panel/MarginContainer/HBoxContainer/SourceTxt
+onready var dest_txt := $VBoxContainer/Panel/MarginContainer/HBoxContainer/DestTxt
 
-# Declare member variables here. Examples:
-# var a: int = 2
-# var b: String = \"text\"
+var source_img_loaded := false
+var image := ImageTexture.new()
+var dest_mat : ShaderMaterial = null
 
-
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
+	dest_mat = dest_txt.material as ShaderMaterial
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta: float) -> void:
-#	pass
+func _on_LoadBtn_pressed() -> void:
+	picker.show_modal()
+
+
+func _on_GenBtn_pressed() -> void:
+	generate()
+	
+func generate():
+	var img = Image.new()
+	img.copy_from(image.get_data())
+	
+	img.bumpmap_to_normalmap(bump_slider.value)
+	
+	dest_txt.texture = ImageTexture.new()
+	dest_txt.texture.create_from_image(img)
+
+func _on_ExportBtn_pressed() -> void:
+	var output : Image = dest_txt.texture.get_data()
+	
+	output.save_png(\"\")
+
+func _on_FileDialog_file_selected(path: String) -> void:
+	src_txt.texture = load_img_texture(path)
+	
+func load_img_texture(path: String) -> ImageTexture:
+	var img := Image.new()
+	img.load(path)
+	
+	image.create_from_image(img)
+	source_img_loaded = true
+		
+	return image
 "
 
+[sub_resource type="ImageTexture" id=3]
+
 [sub_resource type="StyleBoxFlat" id=1]
+
+[sub_resource type="GDScript" id=7]
+script/source = "extends Label
+
+
+func _ready() -> void:
+	pass
+
+
+func _on_bump_changed(value: float) -> void:
+	text = \"%.2f\" % value
+"
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -39,15 +84,15 @@ anchor_bottom = 1.0
 alignment = 1
 
 [node name="Panel" type="PanelContainer" parent="VBoxContainer"]
-margin_right = 1024.0
-margin_bottom = 508.0
+margin_right = 1058.0
+margin_bottom = 546.0
 size_flags_vertical = 3
 
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/Panel"]
 margin_left = 7.0
 margin_top = 7.0
-margin_right = 1017.0
-margin_bottom = 501.0
+margin_right = 1051.0
+margin_bottom = 539.0
 custom_constants/margin_right = 10
 custom_constants/margin_top = 10
 custom_constants/margin_left = 10
@@ -56,54 +101,127 @@ custom_constants/margin_bottom = 10
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Panel/MarginContainer"]
 margin_left = 10.0
 margin_top = 10.0
-margin_right = 1000.0
-margin_bottom = 484.0
+margin_right = 1034.0
+margin_bottom = 522.0
 custom_constants/separation = 0
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/Panel/MarginContainer/HBoxContainer"]
-margin_right = 495.0
-margin_bottom = 474.0
+[node name="SourceTxt" type="TextureRect" parent="VBoxContainer/Panel/MarginContainer/HBoxContainer"]
+margin_right = 512.0
+margin_bottom = 512.0
+rect_min_size = Vector2( 512, 512 )
 size_flags_horizontal = 3
+texture = SubResource( 3 )
+expand = true
 
-[node name="TextureRect2" type="TextureRect" parent="VBoxContainer/Panel/MarginContainer/HBoxContainer"]
-margin_left = 495.0
-margin_right = 990.0
-margin_bottom = 474.0
-size_flags_horizontal = 3
+[node name="DestTxt" type="TextureRect" parent="VBoxContainer/Panel/MarginContainer/HBoxContainer"]
+margin_left = 512.0
+margin_right = 1024.0
+margin_bottom = 512.0
+rect_min_size = Vector2( 512, 512 )
+expand = true
 
 [node name="Panel2" type="PanelContainer" parent="VBoxContainer"]
-margin_top = 512.0
-margin_right = 1024.0
-margin_bottom = 600.0
+margin_top = 550.0
+margin_right = 1058.0
+margin_bottom = 638.0
 custom_styles/panel = SubResource( 1 )
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Panel2"]
-margin_right = 1024.0
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/Panel2"]
+margin_right = 1058.0
+margin_bottom = 88.0
+custom_constants/margin_right = 10
+custom_constants/margin_left = 10
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/Panel2/MarginContainer"]
+margin_left = 10.0
+margin_right = 1048.0
+margin_bottom = 88.0
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2"]
+margin_right = 517.0
 margin_bottom = 88.0
 rect_min_size = Vector2( 0, 88 )
+size_flags_horizontal = 3
 custom_constants/separation = 30
 alignment = 1
 
-[node name="LoadBtn" type="Button" parent="VBoxContainer/Panel2/HBoxContainer"]
-margin_left = 223.0
+[node name="LoadBtn" type="Button" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer"]
+margin_left = 78.0
 margin_top = 23.0
-margin_right = 374.0
+margin_right = 178.0
 margin_bottom = 65.0
+rect_min_size = Vector2( 100, 0 )
 size_flags_vertical = 4
-text = "Load heightmap"
+text = "Load"
 
-[node name="GenBtn" type="Button" parent="VBoxContainer/Panel2/HBoxContainer"]
-margin_left = 404.0
+[node name="GenBtn" type="Button" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer"]
+margin_left = 208.0
 margin_top = 23.0
-margin_right = 599.0
+margin_right = 308.0
 margin_bottom = 65.0
+rect_min_size = Vector2( 100, 0 )
 size_flags_vertical = 4
-text = "Generate normalmap"
+text = "Generate"
 
-[node name="ExportBtn" type="Button" parent="VBoxContainer/Panel2/HBoxContainer"]
-margin_left = 629.0
+[node name="ExportBtn" type="Button" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer"]
+margin_left = 338.0
 margin_top = 23.0
-margin_right = 800.0
+margin_right = 438.0
 margin_bottom = 65.0
+rect_min_size = Vector2( 100, 0 )
 size_flags_vertical = 4
-text = "Export normalmap"
+text = "Export"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2"]
+margin_left = 521.0
+margin_right = 1038.0
+margin_bottom = 88.0
+size_flags_horizontal = 3
+custom_constants/separation = 25
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2"]
+margin_right = 130.0
+margin_bottom = 88.0
+size_flags_vertical = 3
+text = "Bump strength"
+align = 1
+valign = 1
+
+[node name="BumpSlider" type="HSlider" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2"]
+margin_left = 155.0
+margin_top = 36.0
+margin_right = 447.0
+margin_bottom = 52.0
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 10.0
+step = 0.1
+value = 1.0
+tick_count = 9
+ticks_on_borders = true
+
+[node name="Label2" type="Label" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2"]
+margin_left = 472.0
+margin_right = 517.0
+margin_bottom = 88.0
+rect_min_size = Vector2( 45, 0 )
+size_flags_vertical = 3
+text = "1.0"
+align = 1
+valign = 1
+script = SubResource( 7 )
+
+[node name="InputImgDialog" type="FileDialog" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+window_title = "Open a File"
+mode = 0
+access = 2
+
+[connection signal="pressed" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer/LoadBtn" to="." method="_on_LoadBtn_pressed"]
+[connection signal="pressed" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer/GenBtn" to="." method="_on_GenBtn_pressed"]
+[connection signal="pressed" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer/ExportBtn" to="." method="_on_ExportBtn_pressed"]
+[connection signal="value_changed" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2/BumpSlider" to="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2/Label2" method="_on_bump_changed"]
+[connection signal="file_selected" from="InputImgDialog" to="." method="_on_FileDialog_file_selected"]
