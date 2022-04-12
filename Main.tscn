@@ -7,9 +7,11 @@ script/source = "extends Control
 
 onready var in_picker := $InputImgDialog
 onready var out_picker := $OutputImgDialog
-onready var bump_slider := $VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2/BumpSlider
+onready var bump_slider := $VBoxContainer/Panel2/MarginContainer/HBoxContainer2/VBoxContainer/HBoxContainer2/BumpSlider
 onready var src_txt := $VBoxContainer/Panel/MarginContainer/HBoxContainer/SourceTxt
 onready var dest_txt := $VBoxContainer/Panel/MarginContainer/HBoxContainer/DestTxt
+onready var reload_btn := $VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer/ReloadBtn
+onready var export_btn := $VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer/ExportBtn
 
 var source_img_loaded := false
 var image_path := \"\"
@@ -32,6 +34,9 @@ func _on_ExportBtn_pressed() -> void:
 
 func _on_in_file_selected(path: String) -> void:
 	image_path = path
+	reload_btn.disabled = false
+	export_btn.disabled = false
+	
 	src_txt.texture = load_img_texture()
 	generate()
 	
@@ -58,7 +63,7 @@ func _on_out_file_selected(path: String) -> void:
 	
 	output.save_png(path)
 
-func _on_BumpSlider_drag_ended(value_changed: bool) -> void:
+func _on_BumpSlider_drag_ended(_value_changed: bool) -> void:
 	generate()
 "
 
@@ -172,6 +177,7 @@ margin_right = 308.0
 margin_bottom = 65.0
 rect_min_size = Vector2( 100, 0 )
 size_flags_vertical = 4
+disabled = true
 text = "Reload"
 
 [node name="ExportBtn" type="Button" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer"]
@@ -181,29 +187,37 @@ margin_right = 438.0
 margin_bottom = 65.0
 rect_min_size = Vector2( 100, 0 )
 size_flags_vertical = 4
+disabled = true
 text = "Export"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2"]
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2"]
 margin_left = 521.0
 margin_right = 1038.0
 margin_bottom = 88.0
 size_flags_horizontal = 3
+alignment = 1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/VBoxContainer"]
+margin_top = 26.0
+margin_right = 517.0
+margin_bottom = 62.0
+size_flags_horizontal = 3
 custom_constants/separation = 25
 alignment = 1
 
-[node name="Label" type="Label" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2"]
+[node name="Label" type="Label" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/VBoxContainer/HBoxContainer2"]
 margin_right = 130.0
-margin_bottom = 88.0
+margin_bottom = 36.0
 size_flags_vertical = 3
 text = "Bump strength"
 align = 1
 valign = 1
 
-[node name="BumpSlider" type="HSlider" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2"]
+[node name="BumpSlider" type="HSlider" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/VBoxContainer/HBoxContainer2"]
 margin_left = 155.0
-margin_top = 36.0
+margin_top = 10.0
 margin_right = 447.0
-margin_bottom = 52.0
+margin_bottom = 26.0
 size_flags_horizontal = 3
 size_flags_vertical = 4
 max_value = 10.0
@@ -212,10 +226,10 @@ value = 1.0
 tick_count = 9
 ticks_on_borders = true
 
-[node name="Label2" type="Label" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2"]
+[node name="Label2" type="Label" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/VBoxContainer/HBoxContainer2"]
 margin_left = 472.0
 margin_right = 517.0
-margin_bottom = 88.0
+margin_bottom = 36.0
 rect_min_size = Vector2( 45, 0 )
 size_flags_vertical = 3
 text = "1.0"
@@ -223,8 +237,38 @@ align = 1
 valign = 1
 script = SubResource( 7 )
 
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/VBoxContainer"]
+visible = false
+margin_top = 42.0
+margin_right = 517.0
+margin_bottom = 86.0
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/VBoxContainer/HBoxContainer"]
+margin_left = 75.0
+margin_top = 4.0
+margin_right = 176.0
+margin_bottom = 40.0
+text = "Auto reload"
+
+[node name="CheckButton" type="CheckButton" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/VBoxContainer/HBoxContainer"]
+margin_left = 180.0
+margin_right = 256.0
+margin_bottom = 44.0
+
+[node name="Label2" type="Label" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/VBoxContainer/HBoxContainer"]
+margin_left = 260.0
+margin_top = 4.0
+margin_right = 361.0
+margin_bottom = 40.0
+text = "Auto export"
+
+[node name="CheckButton2" type="CheckButton" parent="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/VBoxContainer/HBoxContainer"]
+margin_left = 365.0
+margin_right = 441.0
+margin_bottom = 44.0
+
 [node name="InputImgDialog" type="FileDialog" parent="."]
-visible = true
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 88.0
@@ -238,7 +282,6 @@ access = 2
 filters = PoolStringArray( "*.png ; PNG Images" )
 
 [node name="OutputImgDialog" type="FileDialog" parent="."]
-visible = true
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 88.0
@@ -252,7 +295,7 @@ filters = PoolStringArray( "*.png ; PNG Images" )
 [connection signal="pressed" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer/LoadBtn" to="." method="_on_LoadBtn_pressed"]
 [connection signal="pressed" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer/ReloadBtn" to="." method="_on_ReloadBtn_pressed"]
 [connection signal="pressed" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer/ExportBtn" to="." method="_on_ExportBtn_pressed"]
-[connection signal="drag_ended" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2/BumpSlider" to="." method="_on_BumpSlider_drag_ended"]
-[connection signal="value_changed" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2/BumpSlider" to="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/HBoxContainer2/Label2" method="_on_bump_changed"]
+[connection signal="drag_ended" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/VBoxContainer/HBoxContainer2/BumpSlider" to="." method="_on_BumpSlider_drag_ended"]
+[connection signal="value_changed" from="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/VBoxContainer/HBoxContainer2/BumpSlider" to="VBoxContainer/Panel2/MarginContainer/HBoxContainer2/VBoxContainer/HBoxContainer2/Label2" method="_on_bump_changed"]
 [connection signal="file_selected" from="InputImgDialog" to="." method="_on_in_file_selected"]
 [connection signal="file_selected" from="OutputImgDialog" to="." method="_on_out_file_selected"]
