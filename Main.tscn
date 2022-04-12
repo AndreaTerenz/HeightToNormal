@@ -1,0 +1,109 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://base_theme.tres" type="Theme" id=1]
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends Control
+
+
+# Declare member variables here. Examples:
+# var a: int = 2
+# var b: String = \"text\"
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+#func _process(delta: float) -> void:
+#	pass
+"
+
+[sub_resource type="StyleBoxFlat" id=1]
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 1 )
+script = SubResource( 2 )
+
+[node name="Panel" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+alignment = 1
+
+[node name="Panel" type="PanelContainer" parent="VBoxContainer"]
+margin_right = 1024.0
+margin_bottom = 508.0
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/Panel"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 1017.0
+margin_bottom = 501.0
+custom_constants/margin_right = 10
+custom_constants/margin_top = 10
+custom_constants/margin_left = 10
+custom_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Panel/MarginContainer"]
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 1000.0
+margin_bottom = 484.0
+custom_constants/separation = 0
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer/Panel/MarginContainer/HBoxContainer"]
+margin_right = 495.0
+margin_bottom = 474.0
+size_flags_horizontal = 3
+
+[node name="TextureRect2" type="TextureRect" parent="VBoxContainer/Panel/MarginContainer/HBoxContainer"]
+margin_left = 495.0
+margin_right = 990.0
+margin_bottom = 474.0
+size_flags_horizontal = 3
+
+[node name="Panel2" type="PanelContainer" parent="VBoxContainer"]
+margin_top = 512.0
+margin_right = 1024.0
+margin_bottom = 600.0
+custom_styles/panel = SubResource( 1 )
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Panel2"]
+margin_right = 1024.0
+margin_bottom = 88.0
+rect_min_size = Vector2( 0, 88 )
+custom_constants/separation = 30
+alignment = 1
+
+[node name="LoadBtn" type="Button" parent="VBoxContainer/Panel2/HBoxContainer"]
+margin_left = 223.0
+margin_top = 23.0
+margin_right = 374.0
+margin_bottom = 65.0
+size_flags_vertical = 4
+text = "Load heightmap"
+
+[node name="GenBtn" type="Button" parent="VBoxContainer/Panel2/HBoxContainer"]
+margin_left = 404.0
+margin_top = 23.0
+margin_right = 599.0
+margin_bottom = 65.0
+size_flags_vertical = 4
+text = "Generate normalmap"
+
+[node name="ExportBtn" type="Button" parent="VBoxContainer/Panel2/HBoxContainer"]
+margin_left = 629.0
+margin_top = 23.0
+margin_right = 800.0
+margin_bottom = 65.0
+size_flags_vertical = 4
+text = "Export normalmap"
